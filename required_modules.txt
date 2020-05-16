@@ -1,0 +1,4 @@
+-Pyqt5
+-requests
+-beautifulsoup4
+-PIL
