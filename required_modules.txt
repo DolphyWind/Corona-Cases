@@ -1,4 +1,4 @@
--Pyqt5
--requests
--beautifulsoup4
--PIL
+-Pyqt5 			------------------->	pip install PyQt5
+-requests		------------------->	pip install requests
+-beautifulsoup4	------------------->	pip install beautifulsoup4
+-PIL			------------------->	pip install Pillow
