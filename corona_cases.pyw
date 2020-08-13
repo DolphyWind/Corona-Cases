@@ -41,21 +41,20 @@ class SubWindow(QtWidgets.QWidget):
         self.casesVLayout = QtWidgets.QVBoxLayout()
         self.casesHLayout = QtWidgets.QHBoxLayout()
 
-        # Initializing some base values
         self.countryname = countryName
         self.countryURL = countryurl
         self.countryInfo = countryinfo
 
-        # Creating header text
+        # Header text
         self.header = QtWidgets.QLabel(self.countryname)
         self.header.setAlignment(QtCore.Qt.AlignCenter)
         self.header.setFont(header_font)
 
-        # This text will show up on buttom to respect www.worldometers.com
-        self.providedby = QtWidgets.QLabel("These data provided from " + main_url)
+        # This text will show up on buttom to respect www.worldometers.info
+        self.providedby = QtWidgets.QLabel("These data provided by " + main_url)
         self.providedby.setAlignment(QtCore.Qt.AlignCenter)
 
-        # Crating the back button
+        # Close Button
         self.closeButton = QtWidgets.QPushButton("Close")
         self.closeButton.setFont(cases_font)
         self.closeButton.clicked.connect(self.close)
@@ -75,10 +74,13 @@ class SubWindow(QtWidgets.QWidget):
         # Creating texts for showing up corona cases, deaths etc. of selected country
         self.ActiveText = QtWidgets.QLabel("Active Cases")
         self.Active = QtWidgets.QLabel(countryinfo[0] + "\n")
+
         self.DeathsText = QtWidgets.QLabel("Deaths")
         self.Deaths = QtWidgets.QLabel(countryinfo[1] + "\n")
+
         self.RecoveredText = QtWidgets.QLabel("Recovered")
         self.Recovered = QtWidgets.QLabel(countryinfo[2] + "\n")
+
         self.TotalText = QtWidgets.QLabel("Total Cases")
         self.Total = QtWidgets.QLabel(countryinfo[3] + "\n")
 
@@ -97,7 +99,16 @@ class SubWindow(QtWidgets.QWidget):
         self.Deaths.setStyleSheet("color: red")
         self.Recovered.setStyleSheet("color: #8ACA2B")
 
-        # Layouts
+        # UI
+        self.UI()
+
+        # Setting up a timer so app will scrape data each minute
+        self.timer = QtCore.QTimer()
+        self.timer.timeout.connect(self.Update)
+        self.timer.setInterval(60 * 1000)
+        self.timer.start()
+
+    def UI(self):
         self.headerVLayout.addWidget(self.header)
         self.headerVLayout.addStretch(2)
         self.headerVLayout.addWidget(self.flag)
@@ -130,14 +141,7 @@ class SubWindow(QtWidgets.QWidget):
         self.mainHLayout.addStretch()
         self.mainHLayout.addLayout(self.mainVLayout)
         self.mainHLayout.addStretch()
-
         self.setLayout(self.mainHLayout)
-
-        # Setting up a timer so values will reload themselves on each minute
-        self.timer = QtCore.QTimer()
-        self.timer.timeout.connect(self.Update)
-        self.timer.setInterval(60 * 1000)
-        self.timer.start()
 
     def center(self):
         qr = self.frameGeometry()
@@ -196,12 +200,12 @@ class MainWindow(QtWidgets.QWidget):
         self.setWindowIcon(QtGui.QIcon("corona.png"))
         self.center()
 
-        # Getting the corona values
+        # Scraping data
         self.informations = self.Mainrequest()
-        self.datas = self.informations[0]
+        self.data = self.informations[0]
         self.countries = self.informations[1]
 
-        # Creating the layouts
+        # Layouts
         self.mainVBox = QtWidgets.QVBoxLayout()
         self.headerHBox = QtWidgets.QHBoxLayout()
         self.headerVBox = QtWidgets.QVBoxLayout()
@@ -220,19 +224,19 @@ class MainWindow(QtWidgets.QWidget):
         self.image = QtWidgets.QLabel()
         self.image.setPixmap(QtGui.QPixmap("corona.png"))
 
-        # This text will show up on buttom to respect www.worldometers.com
-        self.providedby = QtWidgets.QLabel("These data provided from " + main_url)
+        # This text will show up on buttom to respect www.worldometers.info
+        self.providedby = QtWidgets.QLabel("These data provided by " + main_url)
         self.providedby.setAlignment(QtCore.Qt.AlignCenter)
 
-        # Creating texts for showing up corona cases, deaths etc.
+        # Texts for displaying data
         self.ActiveText = QtWidgets.QLabel("Active Cases")
-        self.Active = QtWidgets.QLabel(self.datas[0] + "\n")
+        self.Active = QtWidgets.QLabel(self.data[0] + "\n")
         self.DeathsText = QtWidgets.QLabel("Deaths")
-        self.Deaths = QtWidgets.QLabel(self.datas[1] + "\n")
+        self.Deaths = QtWidgets.QLabel(self.data[1] + "\n")
         self.RecoveredText = QtWidgets.QLabel("Recovered")
-        self.Recovered = QtWidgets.QLabel(self.datas[2] + "\n")
+        self.Recovered = QtWidgets.QLabel(self.data[2] + "\n")
         self.TotalText = QtWidgets.QLabel("Total Cases")
-        self.Total = QtWidgets.QLabel(self.datas[3] + "\n")
+        self.Total = QtWidgets.QLabel(self.data[3] + "\n")
 
         # Setting up the fonts
         self.ActiveText.setFont(cases_font)
@@ -250,14 +254,15 @@ class MainWindow(QtWidgets.QWidget):
         self.Recovered.setStyleSheet("color: #8ACA2B")
 
         # Setting up a tooltip for ActiveText so users can see more detailed information
-        self.ActiveText.setToolTip("In mild condition: {}\nSerious or Critical: {}".format(self.datas[4], self.datas[5]))
+        self.ActiveText.setToolTip("In mild condition: {}\nSerious or Critical: {}".format(self.data[4], self.data[5]))
 
-        # Creating the view by country part
+        # View by country Text
         self.ViewByCountryLabel = QtWidgets.QLabel("View by country:")
 
-        # Creating a combobox
+        # Select country combobox
         self.selectCountry = QtWidgets.QComboBox()
-        # Sorting the country names
+
+        # Sorting country names
         countries_list = list()
         for i in self.countries.keys():
             countries_list.append(i)
@@ -273,13 +278,24 @@ class MainWindow(QtWidgets.QWidget):
         self.selectCountry.setFont(cases_font)
         self.viewButton.setFont(cases_font)
 
-        # Layouts
+        # UI
+        self.UI()
+
+        # Setting up a timer so app will scrape data each minute
+        self.timer = QtCore.QTimer()
+        self.timer.timeout.connect(self.Update)
+        self.timer.setInterval(60 * 1000)
+        self.timer.start()
+
+        self.setLayout(self.mainHBox)
+        self.show()
+
+    def UI(self):
         self.viewHBox_child.addWidget(self.ViewByCountryLabel)
         self.viewHBox_child.addWidget(self.selectCountry)
 
         self.viewVBox.addLayout(self.viewHBox_child)
         self.viewVBox.addWidget(self.viewButton)
-
         self.viewHBox.addStretch()
         self.viewHBox.addLayout(self.viewVBox)
         self.viewHBox.addStretch()
@@ -295,7 +311,6 @@ class MainWindow(QtWidgets.QWidget):
         self.casesVBox.addStretch()
         self.casesVBox.addWidget(self.TotalText)
         self.casesVBox.addWidget(self.Total)
-
         self.casesHBox.addLayout(self.casesVBox)
         self.casesHBox.addStretch()
 
@@ -317,15 +332,6 @@ class MainWindow(QtWidgets.QWidget):
         self.mainHBox.addStretch()
         self.mainHBox.addLayout(self.mainVBox)
         self.mainHBox.addStretch()
-
-        # Setting up a timer so values will update themselves on each minute
-        self.timer = QtCore.QTimer()
-        self.timer.timeout.connect(self.Update)
-        self.timer.setInterval(60 * 1000)
-        self.timer.start()
-
-        self.setLayout(self.mainHBox)
-        self.show()
 
     def center(self):
         qr = self.frameGeometry()
