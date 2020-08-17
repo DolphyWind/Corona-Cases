@@ -33,6 +33,20 @@ class SubWindow(QtWidgets.QWidget):
         self.setWindowTitle("Corona Cases of " + countryName)
         self.center()
 
+        self._countryName = countryName
+        self._countryurl = countryurl
+        self._countryinfo = countryinfo
+
+        # UI
+        self.UI()
+
+        # Setting up a timer so app will scrape data each minute
+        self.timer = QtCore.QTimer()
+        self.timer.timeout.connect(self.Update)
+        self.timer.setInterval(60 * 1000)
+        self.timer.start()
+
+    def UI(self):
         # Creating layouts
         self.headerVLayout = QtWidgets.QVBoxLayout()
         self.headerHLayout = QtWidgets.QHBoxLayout()
@@ -41,9 +55,9 @@ class SubWindow(QtWidgets.QWidget):
         self.casesVLayout = QtWidgets.QVBoxLayout()
         self.casesHLayout = QtWidgets.QHBoxLayout()
 
-        self.countryname = countryName
-        self.countryURL = countryurl
-        self.countryInfo = countryinfo
+        self.countryname = self._countryName
+        self.countryURL = self._countryurl
+        self.countryInfo = self._countryinfo
 
         # Header text
         self.header = QtWidgets.QLabel(self.countryname)
@@ -70,19 +84,18 @@ class SubWindow(QtWidgets.QWidget):
         icon.addPixmap(self.flagpixmap)
         self.setWindowIcon(icon)
 
-
         # Creating texts for showing up corona cases, deaths etc. of selected country
         self.ActiveText = QtWidgets.QLabel("Active Cases")
-        self.Active = QtWidgets.QLabel(countryinfo[0] + "\n")
+        self.Active = QtWidgets.QLabel(self._countryinfo[0] + "\n")
 
         self.DeathsText = QtWidgets.QLabel("Deaths")
-        self.Deaths = QtWidgets.QLabel(countryinfo[1] + "\n")
+        self.Deaths = QtWidgets.QLabel(self._countryinfo[1] + "\n")
 
         self.RecoveredText = QtWidgets.QLabel("Recovered")
-        self.Recovered = QtWidgets.QLabel(countryinfo[2] + "\n")
+        self.Recovered = QtWidgets.QLabel(self._countryinfo[2] + "\n")
 
         self.TotalText = QtWidgets.QLabel("Total Cases")
-        self.Total = QtWidgets.QLabel(countryinfo[3] + "\n")
+        self.Total = QtWidgets.QLabel(self._countryinfo[3] + "\n")
 
         # Setting up fonts
         self.ActiveText.setFont(cases_font)
@@ -99,16 +112,7 @@ class SubWindow(QtWidgets.QWidget):
         self.Deaths.setStyleSheet("color: red")
         self.Recovered.setStyleSheet("color: #8ACA2B")
 
-        # UI
-        self.UI()
-
-        # Setting up a timer so app will scrape data each minute
-        self.timer = QtCore.QTimer()
-        self.timer.timeout.connect(self.Update)
-        self.timer.setInterval(60 * 1000)
-        self.timer.start()
-
-    def UI(self):
+        # Design
         self.headerVLayout.addWidget(self.header)
         self.headerVLayout.addStretch(2)
         self.headerVLayout.addWidget(self.flag)
@@ -205,6 +209,19 @@ class MainWindow(QtWidgets.QWidget):
         self.data = self.informations[0]
         self.countries = self.informations[1]
 
+        # UI
+        self.UI()
+
+        # Setting up a timer so app will scrape data each minute
+        self.timer = QtCore.QTimer()
+        self.timer.timeout.connect(self.Update)
+        self.timer.setInterval(60 * 1000)
+        self.timer.start()
+
+        self.setLayout(self.mainHBox)
+        self.show()
+
+    def UI(self):
         # Layouts
         self.mainVBox = QtWidgets.QVBoxLayout()
         self.headerHBox = QtWidgets.QHBoxLayout()
@@ -278,19 +295,7 @@ class MainWindow(QtWidgets.QWidget):
         self.selectCountry.setFont(cases_font)
         self.viewButton.setFont(cases_font)
 
-        # UI
-        self.UI()
-
-        # Setting up a timer so app will scrape data each minute
-        self.timer = QtCore.QTimer()
-        self.timer.timeout.connect(self.Update)
-        self.timer.setInterval(60 * 1000)
-        self.timer.start()
-
-        self.setLayout(self.mainHBox)
-        self.show()
-
-    def UI(self):
+        # Design
         self.viewHBox_child.addWidget(self.ViewByCountryLabel)
         self.viewHBox_child.addWidget(self.selectCountry)
 
